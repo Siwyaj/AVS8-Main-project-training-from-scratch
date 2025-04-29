@@ -160,7 +160,7 @@ cython_debug/
 #.idea/
 
 #music
-.wav
-.wave
-.mid
-.midi
+*.wav
+*.wave
+*.mid
+*.midi
