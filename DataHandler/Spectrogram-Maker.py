@@ -8,7 +8,7 @@ def PathWavToSpectrogram(wavFilePath):
     """
     Converts a .wav file to a spectrogram and saves it as a .png file.
     :param wavFile: The path to the .wav file.
-    :return: None
+    :return: spec
     """
     import matplotlib.pyplot as plt
     from scipy.io import wavfile

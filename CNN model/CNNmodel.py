@@ -1,5 +1,12 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from torchlibrosa.stft import Spectrogram, LogmelFilterBank
+import numpy as np
+import librosa
+from librosa.feature import melspectrogram
+
+import pretty_midi
+
 
 def conv_block(x, filters):
     x = layers.Conv2D(filters, (3, 3), padding='same')(x)
@@ -14,8 +21,41 @@ def conv_block(x, filters):
 def build_crnn(input_shape=(128, None, 1), rnn_units=256):
     inputs = tf.keras.Input(shape=input_shape)  # (freq, time, channels)
     
-    # Apply batch norm to input across freq bins
-    x = layers.BatchNormalization()(inputs)
+    frames_per_second = 100 #set manually, could be somehting else
+    sample_rate = 16000
+    window_size = 2048
+    hop_size = sample_rate // frames_per_second
+    mel_bins = 229
+    fmin = 30
+    fmax = sample_rate // 2
+
+    window = 'hann'
+    center = True
+    pad_mode = 'reflect'
+    ref = 1.0
+    amin = 1e-10
+    top_db = None
+
+    midfeat = 1792
+    momentum = 0.01
+    
+    # Create layers
+    spectrogram_extractor = Spectrogram(
+        n_fft=window_size, hop_length=hop_size, win_length=window_size,
+        window=window, center=center, pad_mode=pad_mode, freeze_parameters=True
+    )
+
+    logmel_extractor = LogmelFilterBank(
+        sr=sample_rate, n_fft=window_size, n_mels=mel_bins, fmin=fmin,
+        fmax=fmax, ref=ref, amin=amin, top_db=top_db, freeze_parameters=True
+    )
+
+
+    # Apply the layers properly
+    x = spectrogram_extractor(inputs)
+    x = logmel_extractor(x)
+
+    x = layers.BatchNormalization()(x)
 
     # 4 convolutional blocks
     x = conv_block(x, 48)
@@ -64,11 +104,6 @@ model.compile(
 model.summary()
 
 
-import numpy as np
-import librosa
-from librosa.feature import melspectrogram
-
-import pretty_midi
 
 def wav_to_logmel(wav_path, sr=16000, n_mels=128, hop_length=160, win_length=512):
     y, _ = librosa.load(wav_path, sr=sr)
