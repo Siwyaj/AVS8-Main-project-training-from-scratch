@@ -1,0 +1,40 @@
+import pretty_midi
+import numpy as np
+import torch
+
+def process_midi(midi_path, n_frames, hop_length=320, sample_rate=16000):
+    pm = pretty_midi.PrettyMIDI(midi_path)
+
+    # Time step per frame
+    frame_times = np.arange(n_frames) * hop_length / sample_rate
+
+    # Initialize empty matrices
+    onset = np.zeros((n_frames, 88), dtype=np.float32)
+    offset = np.zeros((n_frames, 88), dtype=np.float32)
+    frame = np.zeros((n_frames, 88), dtype=np.float32)
+    velocity = np.zeros((n_frames, 88), dtype=np.float32)
+
+    for note in pm.instruments[0].notes:
+        pitch = note.pitch - 21  # MIDI pitch to index (21=A0, 108=C8)
+        if pitch < 0 or pitch > 87:
+            continue
+
+        onset_idx = int(note.start * sample_rate / hop_length)
+        offset_idx = int(note.end * sample_rate / hop_length)
+
+        if onset_idx >= n_frames:
+            continue
+        offset_idx = min(offset_idx, n_frames - 1)
+
+        # Clip or pad
+        onset[onset_idx, pitch] = 1.0
+        offset[offset_idx, pitch] = 1.0
+        frame[onset_idx:offset_idx+1, pitch] = 1.0
+        velocity[onset_idx, pitch] = note.velocity / 127.0  # Normalize
+
+    return {
+        'onset': torch.tensor(onset),
+        'offset': torch.tensor(offset),
+        'frame': torch.tensor(frame),
+        'velocity': torch.tensor(velocity),
+    }
