@@ -15,7 +15,6 @@ import config
 
 def pack_maestro_dataset_to_hdf5(args):
     """Load & resample MAESTRO audio files, then write to hdf5 files.
-
     Args:
       dataset_dir: str, directory of dataset
       workspace: str, directory of your workspace
