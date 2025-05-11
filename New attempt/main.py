@@ -12,4 +12,4 @@ if __name__ == '__main__':
     a=1 #just so it is not empty
     
     #outcomment the part you want to do
-    #MakeHDF5()
+    MakeHDF5()

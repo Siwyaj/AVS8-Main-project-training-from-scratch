@@ -1,0 +1,1 @@
+sample_rate = 16000 #from the maestro dataset

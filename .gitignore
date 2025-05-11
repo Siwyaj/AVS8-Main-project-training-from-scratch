@@ -164,3 +164,6 @@ cython_debug/
 *.wave
 *.mid
 *.midi
+
+#hdf5
+*.hdf5
