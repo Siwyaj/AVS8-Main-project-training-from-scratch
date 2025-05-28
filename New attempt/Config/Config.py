@@ -1,1 +1,10 @@
 sample_rate = 16000 #from the maestro dataset
+augmentation = 'none' 
+batch_size = 32
+classes_num = 88
+begin_note = 21
+segment_seconds = 10
+hop_seconds = 1
+frames_per_second = 100
+velocity_scale = 128
+learning_rate = 5e-4
